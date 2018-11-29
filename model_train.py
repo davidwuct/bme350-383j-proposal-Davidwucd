@@ -181,10 +181,10 @@ def train_my_model(patient_ID, preictal_period_minutes, index):
     model = my_model(input_dim)
     model_fname = 'stored_model/PID_' + str(patient_ID) + '_p_' + str(preictal_period_minutes) + \
         '_index_' + str(index+2) + '_weights.hdf5'
-    early_stopping = utils.EarlyStoppingByAUC(validation_data=(validation_x, validation_y), patience=10, verbose=1)
-    model_auc_cp = utils.ModelAUCCheckpoint(model_fname, validation_data=(validation_x, validation_y), \
+    early_stopping = tools.EarlyStoppingByAUC(validation_data=(validation_x, validation_y), patience=10, verbose=1)
+    model_auc_cp = tools.ModelAUCCheckpoint(model_fname, validation_data=(validation_x, validation_y), \
         verbose=1, save_weights_only=False)
-    ReduceLR = utils.LrReducer(validation_data=(validation_x, validation_y), patience=5, verbose=1)
+    ReduceLR = tools.LrReducer(validation_data=(validation_x, validation_y), patience=5, verbose=1)
     callbacks = [
         early_stopping,
         ReduceLR,
@@ -217,7 +217,7 @@ def train_my_model(patient_ID, preictal_period_minutes, index):
             best_tpr_fpr = tpr - fpr
     test_predict_probas = model.predict(test_x)
     test_predict_labels = (test_predict_probas > best_thes).astype('int32')
-    test_accuracy = utils.classes_prediction_accuracy(test_predict_labels, test_y)  
+    test_accuracy = tools.classes_prediction_accuracy(test_predict_labels, test_y)  
     test_score = roc_auc_score(test_y, test_predict_probas, average='weighted')
     print('test ROC AUC score is: %f' %(test_score))
     csv_fname = 'prediction_results.csv'
@@ -258,7 +258,7 @@ def false_alarm_test(patient_ID, preictal_period_minutes, index, theshold):
     x_test = []
     print('data normalization for data... ')
     for i in tqdm(range(x_chain_test.shape[0] - 30)):
-        x_test.append(utils.data_normalization(x_chain_test[i:i+30]))
+        x_test.append(x_chain_test[i:i+30])
     x_test = np.array(x_test)
     print(x_test.shape)
     del x_chain_test
@@ -328,7 +328,7 @@ def main():
     patients_ID_unrepeated = ['11002', '16202', '26102', '30802', '32702', '45402', '55202']
     for patient_ID in patients_ID_unrepeated:
         split_train_predict(patient_ID)
-        #patient_train_test(patient_ID, preictal_period_minutes=10)
+        patient_train_test(patient_ID, preictal_period_minutes=10)
 
 
 if __name__ == '__main__':
